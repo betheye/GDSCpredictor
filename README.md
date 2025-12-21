@@ -3,7 +3,7 @@
 ## Overview
 **GDSCpredictor** is an R package designed to predict the drug sensitivity (IC50) of cancer cell lines based on genomic and molecular features. It encapsulates a pre-trained **XGBoost** model and a robust feature encoding pipeline (One-Hot, Frequency, and Target Encoding) derived from the Genomics of Drug Sensitivity in Cancer (GDSC) dataset.
 
-This package was developed as part of the BIO215 Capstone Project to provide a programmatic interface for the prediction logic used in the companion [Shiny Web Application](https://github.com/your-repo/web-app).
+This package was developed to provide a programmatic interface for the prediction logic used in the companion [Shiny Web Application](https://github.com/your-repo/web-app).
 
 ## Features
 *   **Pre-trained Model**: Bundled XGBoost model optimized for IC50 prediction.
@@ -12,22 +12,6 @@ This package was developed as part of the BIO215 Capstone Project to provide a p
     *   `predict_single_sensitivity()`: Optimized for single-sample queries.
     *   `predict_batch_sensitivity()`: Efficiently processes large datasets.
 *   **Interpretation**: Automatically classifies sensitivity as **High**, **Moderate**, or **Resistant**.
-
-## Model Selection & Performance
-
-We evaluated multiple machine learning models and selected **XGBoost with One-Hot Frequency Encoding** as the final engine for this application due to its superior accuracy and stability.
-
-### Performance Validation
-
-**1. Prediction Accuracy**
-The model demonstrates high accuracy, with predicted IC50 values tightly clustering around the actual values (diagonal line).
-
-![Predicted vs Actual](man/figures/scatter_xgb_onehot_freq_target.png)
-
-**2. Stability (Train vs. Test)**
-The model shows low overfitting, with consistent performance across training and testing iterations.
-
-![Train vs Test Overfit](man/figures/train_vs_test_overfit.png)
 
 ## Installation
 
@@ -100,6 +84,22 @@ head(results)
 | `MSI_Status` | Microsatellite Instability | `"MSS/MSI-L"`, `"MSI-H"` |
 | `Drug_Target` | Molecular target of the drug | `"EGFR"`, `"TOP1"` |
 | `Target_Pathway` | Biological pathway of target | `"EGFR signaling"` |
+
+## Model Selection & Performance
+
+We evaluated multiple machine learning models and selected **XGBoost with One-Hot Frequency Encoding** as the final engine for this application due to its superior accuracy and stability.
+
+### Performance Validation
+
+**1. Prediction Accuracy**
+The model demonstrates high accuracy, with predicted IC50 values tightly clustering around the actual values (diagonal line).
+
+![Predicted vs Actual](man/figures/scatter_xgb_onehot_freq_target.png)
+
+**2. Stability (Train vs. Test)**
+The model shows low overfitting, with consistent performance across training and testing iterations.
+
+![Train vs Test Overfit](man/figures/train_vs_test_overfit.png)
 
 ## Authors
 *   **Xinmiao Wu** (Package Maintainer & R Development)
