@@ -3,7 +3,7 @@
 ## Overview
 **GDSCpredictor** is an R package designed to predict the drug sensitivity (IC50) of cancer cell lines based on genomic and molecular features. It encapsulates a pre-trained **XGBoost** model and a robust feature encoding pipeline (One-Hot, Frequency, and Target Encoding) derived from the Genomics of Drug Sensitivity in Cancer (GDSC) dataset.
 
-This package was developed to provide a programmatic interface for the prediction logic used in the companion [Shiny Web Application](https://github.com/your-repo/web-app).
+This package was developed to provide a programmatic interface for the prediction logic used in the companion [Shiny Web Application](https://yihanzhou23.shinyapps.io/GDSC_database_and_predictor/).
 
 ## Features
 *   **Pre-trained Model**: Bundled XGBoost model optimized for IC50 prediction.
