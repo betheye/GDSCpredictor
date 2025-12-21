@@ -1,0 +1,17 @@
+Package: GDSCpredictor
+Type: Package
+Title: GDSC Drug Sensitivity Predictor
+Version: 1.0.0
+Author: Xinmiao Wu
+Maintainer: Xinmiao Wu <Xinmiao.Wu23@student.xjtlu.edu.cn>
+Description: A package to predict drug sensitivity (IC50) for cancer cell lines using XGBoost models trained on the GDSC dataset. Supports both single-sample and batch predictions.
+License: MIT + file LICENSE
+Encoding: UTF-8
+LazyData: true
+Imports:
+    xgboost,
+    jsonlite,
+    dplyr,
+    stats,
+    utils
+RoxygenNote: 7.3.3

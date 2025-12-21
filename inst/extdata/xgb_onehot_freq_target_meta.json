@@ -1,0 +1,9 @@
+{
+  "model_type": "xgboost",
+  "encoding_strategy": "onehot_freq_target",
+  "feature_names": ["Microsatellite.instability.Status..MSI._MSI.H", "Microsatellite.instability.Status..MSI._MSS.MSI.L", "Screen.Medium_D.F12", "Growth.Properties_Adherent", "Growth.Properties_Semi.Adherent", "CNA_N", "Gene.Expression_N", "Methylation_N", "TCGA_DESC_FreqEnc", "GDSC.Tissue.descriptor.1_FreqEnc", "GDSC.Tissue.descriptor.2_FreqEnc", "TARGET_PATHWAY_FreqEnc", "COSMIC_ID_TargetEnc", "DRUG_ID_TargetEnc", "TARGET_TargetEnc"],
+  "n_features": 15,
+  "r_version": "R version 4.4.1 (2024-06-14)",
+  "xgboost_version": "1.7.11.1",
+  "created_at": "2025-12-20 19:01:58.675498"
+}
