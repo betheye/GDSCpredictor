@@ -9,7 +9,7 @@
 #' Encode Features for Prediction
 #'
 #' Applies specific encoding strategies (One-Hot, Frequency, Target) to raw input data
-#' to prepare it for the XGBoost model.
+#' to prepare it for the machine learning models.
 #'
 #' @param input_data A data frame containing the raw categorical features:
 #'   \itemize{
@@ -20,23 +20,37 @@
 #'     \item Drug_Target
 #'     \item Target_Pathway
 #'   }
-#' @return A numeric matrix with encoded features, ready for `xgb.predict`.
+#' @param strategy Character string specifying the encoding strategy:
+#'   \itemize{
+#'     \item \code{"onehot_freq_target"} (default): Combined encoding used by XGBoost model
+#'     \item \code{"onehot_only"}: Pure one-hot encoding for interpretability
+#'   }
+#' @return A numeric matrix with encoded features, ready for model prediction.
 #' @examples
 #' \dontrun{
 #' sample_data <- data.frame(
 #'     Tissue = "breast",
 #'     Sub_Tissue = "breast",
-#'     Encode_Test = "TRUE" # Dummy example
+#'     Cancer_Type = "BRCA",
+#'     MSI_Status = "MSS/MSI-L",
+#'     Drug_Target = "TOP1",
+#'     Target_Pathway = "DNA replication"
 #' )
 #' encoded <- encode_features(sample_data)
 #' }
 #' @export
-encode_features <- function(input_data) {
+encode_features <- function(input_data, strategy = c("onehot_freq_target", "onehot_only")) {
+    strategy <- match.arg(strategy)
+
     # Load encoding maps used during training
     onehot_mapping <- readRDS(.load_resource("onehot_mapping_robust.rds"))
     freq_maps <- readRDS(.load_resource("frequency_encoding_maps_robust.rds"))
     target_maps <- readRDS(.load_resource("target_encoding_maps_robust.rds"))
-    feature_meta <- jsonlite::fromJSON(.load_resource("xgb_onehot_freq_target_meta.json"))
+    feature_meta <- if (strategy == "onehot_freq_target") {
+        jsonlite::fromJSON(.load_resource("xgb_onehot_freq_target_meta.json"))
+    } else {
+        jsonlite::fromJSON(.load_resource("ridge_onehot_only_meta.json"))
+    }
 
     encoded <- data.frame(row.names = 1:nrow(input_data))
 
@@ -55,24 +69,27 @@ encode_features <- function(input_data) {
         }
     }
 
-    # 2. Frequency Encoding
-    for (col in names(freq_maps)) {
-        if (col %in% colnames(input_data)) {
-            freq_map <- freq_maps[[col]]
-            new_col_name <- paste0(col, "_FreqEnc")
-            matched_idx <- match(input_data[[col]], freq_map[[col]])
-            encoded[[new_col_name]] <- ifelse(is.na(matched_idx), 0, freq_map$frequency[matched_idx])
+    # For onehot_freq_target strategy, add frequency and target encodings
+    if (strategy == "onehot_freq_target") {
+        # 2. Frequency Encoding
+        for (col in names(freq_maps)) {
+            if (col %in% colnames(input_data)) {
+                freq_map <- freq_maps[[col]]
+                new_col_name <- paste0(col, "_FreqEnc")
+                matched_idx <- match(input_data[[col]], freq_map[[col]])
+                encoded[[new_col_name]] <- ifelse(is.na(matched_idx), 0, freq_map$frequency[matched_idx])
+            }
         }
-    }
 
-    # 3. Target Encoding
-    for (col in names(target_maps)) {
-        if (col %in% colnames(input_data)) {
-            target_map <- target_maps[[col]]
-            global_mean <- attr(target_map, "global_mean")
-            new_col_name <- paste0(col, "_TargetEnc")
-            matched_idx <- match(input_data[[col]], target_map[[col]])
-            encoded[[new_col_name]] <- ifelse(is.na(matched_idx), global_mean, target_map$smoothed_mean[matched_idx])
+        # 3. Target Encoding
+        for (col in names(target_maps)) {
+            if (col %in% colnames(input_data)) {
+                target_map <- target_maps[[col]]
+                global_mean <- attr(target_map, "global_mean")
+                new_col_name <- paste0(col, "_TargetEnc")
+                matched_idx <- match(input_data[[col]], target_map[[col]])
+                encoded[[new_col_name]] <- ifelse(is.na(matched_idx), global_mean, target_map$smoothed_mean[matched_idx])
+            }
         }
     }
 
@@ -88,4 +105,30 @@ encode_features <- function(input_data) {
     encoded <- encoded[, expected_features, drop = FALSE]
 
     return(as.matrix(encoded))
+}
+
+#' Get Available Models
+#'
+#' Returns information about available prediction models and their characteristics.
+#'
+#' @return A data frame with model information including name, accuracy, and use case.
+#' @examples
+#' \dontrun{
+#' get_available_models()
+#' }
+#' @export
+get_available_models <- function() {
+    data.frame(
+        Model = c("xgboost", "ridge"),
+        Description = c(
+            "XGBoost (Mixed Encoding)",
+            "Ridge Regression (One-Hot)"
+        ),
+        Test_R2 = c(0.838, 0.818),
+        Use_Case = c(
+            "Efficiency Specialist (Default): Balanced speed/accuracy",
+            "Generalization Specialist: Robust for novel drugs"
+        ),
+        stringsAsFactors = FALSE
+    )
 }

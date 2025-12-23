@@ -1,17 +1,35 @@
 Package: GDSCpredictor
 Type: Package
-Title: GDSC Drug Sensitivity Predictor
-Version: 1.0.0
-Author: Xinmiao Wu
+Title: Predict Drug Sensitivity in Cancer Cell Lines Using Machine Learning
+Version: 1.2.0
+Author: Xinmiao Wu [aut, cre]
 Maintainer: Xinmiao Wu <Xinmiao.Wu23@student.xjtlu.edu.cn>
-Description: A package to predict drug sensitivity (IC50) for cancer cell lines using XGBoost models trained on the GDSC dataset. Supports both single-sample and batch predictions.
+Description: Provides trained machine learning models to predict drug sensitivity 
+    (LN_IC50) in cancer cell lines using genomic and drug features from the GDSC 
+    database. The package includes XGBoost (optimized for efficiency) and Ridge Regression for 
+    superior generalization. It enables single-sample and batch predictions, 
+    supports automated One-Hot/Frequency/Target encoding, and provides 
+    interpretation of sensitivity status. Validated with extensive generalization 
+    analysis (LODO/LOCO).
 License: MIT + file LICENSE
+URL: https://github.com/betheye/GDSCpredictor
+BugReports: https://github.com/betheye/GDSCpredictor/issues
 Encoding: UTF-8
 LazyData: true
+Depends:
+    R (>= 4.0.0)
 Imports:
     xgboost,
+    glmnet,
     jsonlite,
     dplyr,
     stats,
     utils
+Suggests:
+    testthat (>= 3.0.0),
+    knitr,
+    rmarkdown,
+    ggplot2
+VignetteBuilder: knitr
 RoxygenNote: 7.3.3
+NeedsCompilation: no

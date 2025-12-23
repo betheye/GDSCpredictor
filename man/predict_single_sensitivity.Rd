@@ -4,7 +4,7 @@
 \alias{predict_single_sensitivity}
 \title{Single Data Point Prediction}
 \usage{
-predict_single_sensitivity(input_data)
+predict_single_sensitivity(input_data, model = c("xgboost", "rf", "ridge"))
 }
 \arguments{
 \item{input_data}{A data frame valid for encoding, must contain exactly 1 row.
@@ -17,9 +17,16 @@ predict_single_sensitivity(input_data)
   \item \code{Drug_Target}: The molecular target of the drug (e.g., "TOP1", "EGFR").
   \item \code{Target_Pathway}: The biological pathway targeted (e.g., "DNA replication").
 }}
+
+\item{model}{Character string specifying the model to use. Options:
+\itemize{
+  \item \code{"xgboost"} (default): Best speed-accuracy trade-off (R² = 0.838)
+  \item \code{"rf"}: Random Forest, highest accuracy (R² = 0.843)
+  \item \code{"ridge"}: Ridge regression, best generalization to novel drugs
+}}
 }
 \value{
-A data frame with prediction results.
+A data frame with prediction results including Predicted_IC50, Sensitivity_Status, and Model_Used.
 }
 \description{
 Predicts IC50 for a single cell line - drug pair.
@@ -34,5 +41,8 @@ single_case <- data.frame(
 )
 res <- predict_single_sensitivity(single_case)
 print(res)
+
+# Use Random Forest for higher accuracy
+res_rf <- predict_single_sensitivity(single_case, model = "rf")
 }
 }

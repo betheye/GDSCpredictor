@@ -4,11 +4,18 @@
 \alias{predict_batch_sensitivity}
 \title{Batch Prediction}
 \usage{
-predict_batch_sensitivity(input_data)
+predict_batch_sensitivity(input_data, model = c("xgboost", "rf", "ridge"))
 }
 \arguments{
 \item{input_data}{A data frame containing multiple rows of features.
 See \code{\link{predict_single_sensitivity}} for the list of required columns.}
+
+\item{model}{Character string specifying the model to use. Options:
+\itemize{
+  \item \code{"xgboost"} (default): Best speed-accuracy trade-off
+  \item \code{"rf"}: Random Forest, highest accuracy
+  \item \code{"ridge"}: Ridge regression, best generalization
+}}
 }
 \value{
 A data frame with prediction results appended.
@@ -22,8 +29,11 @@ Predicts IC50 for multiple cell line - drug pairs using optimized batch processi
 example_path <- system.file("extdata", "batch_input_example.csv", package = "GDSCpredictor")
 batch_data <- read.csv(example_path)
 
-# Run batch prediction
+# Run batch prediction with default XGBoost
 res <- predict_batch_sensitivity(batch_data)
 head(res)
+
+# Compare with Random Forest predictions
+res_rf <- predict_batch_sensitivity(batch_data, model = "rf")
 }
 }

@@ -4,7 +4,7 @@
 \alias{encode_features}
 \title{Encode Features for Prediction}
 \usage{
-encode_features(input_data)
+encode_features(input_data, strategy = c("onehot_freq_target", "onehot_only"))
 }
 \arguments{
 \item{input_data}{A data frame containing the raw categorical features:
@@ -16,20 +16,29 @@ encode_features(input_data)
   \item Drug_Target
   \item Target_Pathway
 }}
+
+\item{strategy}{Character string specifying the encoding strategy:
+\itemize{
+  \item \code{"onehot_freq_target"} (default): Combined encoding used by XGBoost and RF models
+  \item \code{"onehot_only"}: Pure one-hot encoding for interpretability
+}}
 }
 \value{
-A numeric matrix with encoded features, ready for `xgb.predict`.
+A numeric matrix with encoded features, ready for model prediction.
 }
 \description{
 Applies specific encoding strategies (One-Hot, Frequency, Target) to raw input data
-to prepare it for the XGBoost model.
+to prepare it for the machine learning models.
 }
 \examples{
 \dontrun{
 sample_data <- data.frame(
     Tissue = "breast",
     Sub_Tissue = "breast",
-    Encode_Test = "TRUE" # Dummy example
+    Cancer_Type = "BRCA",
+    MSI_Status = "MSS/MSI-L",
+    Drug_Target = "TOP1",
+    Target_Pathway = "DNA replication"
 )
 encoded <- encode_features(sample_data)
 }
