@@ -5,7 +5,7 @@
 
 ## Overview
 
-**GDSCpredictor** is a robust R package developed to predict cancer drug sensitivity (IC50) using advanced machine learning models trained on the [Genomics of Drug Sensitivity in Cancer (GDSC)](https://www.cancerrxgene.org/) database. It encapsulates the predictive logic of our extensive [Bioinformatics Pipeline](https://github.com/betheye/GDSCpipeline) and powers our [Online Shiny Application](https://bio215.shinyapps.io/gdsc_database_and_predictor_215/).
+**GDSCpredictor** is a robust R package developed to predict cancer drug sensitivity (IC50) using advanced machine learning models trained on the [Genomics of Drug Sensitivity in Cancer (GDSC)](https://www.cancerrxgene.org/) database. It encapsulates the predictive models derived from our comprehensive [Bioinformatics Pipeline](https://github.com/betheye/GDSCpipeline)—which handles data exploration, model training, and interpretability analysis—and powers the backend of our [Online Shiny Application](https://bio215.shinyapps.io/gdsc_database_and_predictor_215/).
 
 ## Key Features
 
@@ -98,7 +98,7 @@ Predicting for **novel drugs** (Leave-One-Drug-Out) is significantly harder than
 ## Citation
 
 If you use this package, please cite our project repository:
-[https://github.com/betheye/GDSCpipeline](https://github.com/betheye/GDSCpipeline)
+[https://github.com/betheye/GDSCpredictor](https://github.com/betheye/GDSCpredictor)
 
 ## Authors
 - **Xinmiao Wu** (Package Maintainer)
