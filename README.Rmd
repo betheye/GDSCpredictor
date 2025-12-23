@@ -15,50 +15,40 @@ knitr::opts_chunk$set(
 
 # GDSCpredictor: Drug Sensitivity Prediction for Cancer Cell Lines
 
+[![Shiny App](https://img.shields.io/badge/Shiny-Online%20Predictor-blue?logo=r)](https://bio215.shinyapps.io/gdsc_database_and_predictor_215/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+
 ## Overview
 
-**GDSCpredictor** is an R package designed to predict the drug sensitivity (IC50) of cancer cell lines based on genomic and molecular features. It encapsulates a pre-trained **XGBoost** model and a robust feature encoding pipeline (One-Hot, Frequency, and Target Encoding) derived from the Genomics of Drug Sensitivity in Cancer (GDSC) dataset.
+**GDSCpredictor** is a robust R package developed to predict cancer drug sensitivity (IC50) using advanced machine learning models trained on the [Genomics of Drug Sensitivity in Cancer (GDSC)](https://www.cancerrxgene.org/) database. It encapsulates the predictive logic of our extensive [Bioinformatics Pipeline](https://github.com/betheye/GDSCpipeline) and powers our [Online Shiny Application](https://bio215.shinyapps.io/gdsc_database_and_predictor_215/).
 
-This package was developed to provide a programmatic interface for the prediction logic used in the companion [Shiny Web Application](https://yihanzhou23.shinyapps.io/GDSC_database_and_predictor/).
+## Key Features
 
-## Features
-
-*   **Pre-trained Model**: Bundled XGBoost model optimized for IC50 prediction.
-*   **Automated Encoding**: Handles categorical variable transformation (Tissue, Cancer Type, Target Pathway) automatically.
-*   **Dual Modes**:
-    *   `predict_single_sensitivity()`: Optimized for single-sample queries.
-    *   `predict_batch_sensitivity()`: Efficiently processes large datasets.
-*   **Interpretation**: Automatically classifies sensitivity as **High**, **Moderate**, or **Resistant**.
+*   **⚡️ High Efficiency**: Default **XGBoost** model (Target-Frequency Encoding) delivers predictions in milliseconds.
+*   **🔄 Robust Generalization**: **Ridge Regression** (One-Hot Encoding) optimized for novel drug chemotypes.
+*   **🧬 Auto-Encoding**: Built-in pipeline handles Tissue, Cancer Type, MSI Status, and Structure Features automatically.
+*   **📦 Batch Processing**: Vectorized operations for analyzing thousands of drug-cell pairs instantly.
 
 ## Installation
 
-You can install the development version of GDSCpredictor from GitHub:
+Install directly from GitHub:
 
-```r
+```{r, eval=FALSE}
 # install.packages("devtools")
-devtools::install_github("your-username/GDSCpredictor")
-```
-
-Or install locally if you have the source code:
-
-```r
-devtools::install()
+devtools::install_github("XinmiaoWu-xjtlu/GDSCpredictor")
 ```
 
 ## Quick Start
 
-### 1. Load the Package
-
+### 1. Load Package
 ```{r}
 library(GDSCpredictor)
 ```
 
-### 2. Prepare Input Data
-
-The model requires a specific set of features. Ensure your data frame contains the following columns:
-
+### 2. Predict Single Case (Default: XGBoost)
 ```{r}
-input_data <- data.frame(
+# Define a cell line - drug pair
+input_case <- data.frame(
     Tissue = "breast",
     Sub_Tissue = "breast",
     Cancer_Type = "BRCA",
@@ -67,65 +57,68 @@ input_data <- data.frame(
     Target_Pathway = "DNA replication",
     stringsAsFactors = FALSE
 )
-```
 
-### 3. Single Prediction
-
-```{r}
-result <- predict_single_sensitivity(input_data)
+# Predict IC50 (Natural Log Scale)
+result <- predict_single_sensitivity(input_case)
 print(result[, c("Predicted_IC50", "Sensitivity_Status")])
 ```
 
-### 4. Batch Prediction
-
+### 3. Predict for Novel Drugs (Model: Ridge)
 ```{r}
-# Batch data (example: we duplicate the row for demonstration)
-batch_data <- rbind(input_data, input_data)
-results <- predict_batch_sensitivity(batch_data)
-head(results[, c("Predicted_IC50", "Sensitivity_Status")])
+# Use Ridge Regression when the drug mechanism is unknown/novel
+result_ridge <- predict_single_sensitivity(input_case, model = "ridge")
 ```
 
-## Detailed API
+---
 
-| Function | Description |
-| :--- | :--- |
-| `predict_single_sensitivity(data)` | Predicts IC50 for a single row. Returns error if >1 row. |
-| `predict_batch_sensitivity(data)` | Predicts IC50 for multiple rows. Optimized for batch processing. |
-| `encode_features(data)` | Returns the numeric matrix used by XGBoost (useful for debugging or custom modeling). |
+## 📊 Comprehensive Analysis & Validation
 
-## Input Features Dictionary
+Our package is built upon a systematic benchmark of **10 machine learning models** across **4 encoding strategies** (Total 40 combinations).
 
-| Column Name | Description | Example |
-| :--- | :--- | :--- |
-| `Tissue` | Primary tissue origin | `"lung"`, `"breast"` |
-| `Sub_Tissue` | Detailed tissue descriptor | `"lung_NSCLC"` |
-| `Cancer_Type` | TCGA Cancer Code | `"LUAD"`, `"BRCA"` |
-| `MSI_Status` | Microsatellite Instability | `"MSS/MSI-L"`, `"MSI-H"` |
-| `Drug_Target` | Molecular target of the drug | `"EGFR"`, `"TOP1"` |
-| `Target_Pathway` | Biological pathway of target | `"EGFR signaling"` |
+### 1. Efficiency vs. Accuracy Trade-off
+We selected **XGBoost** as the default model because it occupies the "sweet spot" of the performance landscape. As shown below, it achieves near-optimal accuracy (R² > 0.83) while being orders of magnitude faster than Random Forest.
 
-## Model Selection & Performance
+![Efficiency Analysis](man/figures/time_vs_performance.png)
+*Figure 1. Training time vs. Test R² performance. XGBoost (green zone) offers the best balance of speed and accuracy.*
 
-We evaluated multiple machine learning models and selected **XGBoost with One-Hot Frequency Encoding** as the final engine for this application due to its superior accuracy and stability.
+### 2. Prediction Accuracy (XGBoost)
+The model demonstrates excellent calibration across the full range of drug sensitivities.
 
-### Performance Validation
+![Correlation](man/figures/scatter_xgb_onehot_freq_target.png)
+*Figure 2. Predicted vs. Actual LN_IC50 for the XGBoost model. Pearson r = 0.916 indicates strong predictive power.*
 
-**1. Prediction Accuracy**
-The model demonstrates high accuracy, with predicted IC50 values tightly clustering around the actual values (diagonal line).
+### 3. Biological Interpretability (SHAP Analysis)
+To ensure our models learn biologically relevant features rather than statistical artifacts, we analyzed feature contributions using SHAP values.
+- **Top Predictor**: `Growth.Properties` (Adherent vs Suspension)
+- **Pathway Analysis**: Drugs targeting **Mitosis** (red points, negative SHAP) consistently predict higher sensitivity (lower IC50), aligning with clinical efficacy of anti-mitotic agents.
 
-![Predicted vs Actual](man/figures/scatter_xgb_onehot_freq_target.png)
+![SHAP Summary](man/figures/shap_summary_onehot_only.png)
+*Figure 3. SHAP summary plot showing top features driving drug sensitivity predictions.*
 
-**2. Stability (Train vs. Test)**
-The model shows low overfitting, with consistent performance across training and testing iterations.
+### 4. Generalization Challenge (LODO Analysis)
+Predicting for **novel drugs** (Leave-One-Drug-Out) is significantly harder than standard prediction. While complex models like Random Forest overfit to specific drugs, **Ridge Regression** maintains more robust performance reliability, making it our recommended choice for novel compounds.
 
-![Train vs Test Overfit](man/figures/train_vs_test_overfit.png)
+![Generalization](man/figures/generalization_analysis.png)
+*Figure 4. Impact of data splitting strategy on model error (MAE). Ridge Regression minimizes error variance on novel drugs.*
+
+---
+
+## 🧠 Model Portfolio
+
+| Model | Underlying Engine | R² (Test) | Best Use Case | Logic |
+|-------|-------------------|-----------|---------------|-------|
+| **XGBoost** (Default) | `xgboost` | **0.838** | **Standard Prediction** | uses **Target Encoding** to leverage historical efficacy data. Fast, accurate, ideal for screening known drugs. |
+| **Ridge** | `glmnet` | **0.818** | **Novel Discovery** | Uses **One-Hot Encoding** to rely solely on biological mechanisms. Prevents overfitting to specific drug IDs. |
+
+## Citation
+
+If you use this package, please cite our project repository:
+[https://github.com/betheye/GDSCpipeline](https://github.com/betheye/GDSCpipeline)
 
 ## Authors
-
-*   **Xinmiao Wu** (Package Maintainer & R Development)
-*   **Yihan Zhou** (Machine Learning Model)
-*   **Chonghui Ni** (Web Application Integration)
+- **Xinmiao Wu** (Package Maintainer)
+- **Yihan Zhou** (Machine Learning Pipeline)
+- **Chonghui Ni** (Web Application)
 
 ## License
-
-MIT
+MIT License
